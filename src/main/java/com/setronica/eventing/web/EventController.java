@@ -28,6 +28,6 @@ public class EventController {
     public List<Event> searchEvents(
             @RequestParam String q
     ) {
-        throw new UnsupportedOperationException("Not implemented");
+        return eventService.getByTitle(q);
     }
 }
