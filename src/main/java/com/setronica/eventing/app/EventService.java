@@ -18,8 +18,4 @@ public class EventService {
     public List<Event> getAll() {
         return eventRepository.findAll();
     }
-
-    public List<Event> getByTitle(String q) {
-        return eventRepository.getByTitle(q);
-    }
 }
