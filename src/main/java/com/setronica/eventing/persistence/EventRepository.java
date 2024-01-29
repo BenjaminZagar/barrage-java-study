@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,5 +28,17 @@ public class EventRepository {
         }
 
         return null;
+    }
+
+    public List<Event> getByTitle(String q) {
+        List<Event> eventList = findAll();
+        List<Event> filteredEvents = new ArrayList<>();
+
+        for (Event event : eventList) {
+            if (q.equals(event.getTitle())) {
+                filteredEvents.add(event);
+            }
+        }
+        return filteredEvents;
     }
 }
