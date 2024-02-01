@@ -1,0 +1,31 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+    <changeSet id="20240129-1" author="alex.glebov">
+        <sql>
+            create table event_schedule
+            (
+                id              serial primary key,
+                event_id        int            not null,
+                event_date      date           not null,
+                available_seats int            not null,
+                price           decimal(10, 2) not null
+            );
+        </sql>
+        <sql>
+            create table ticket_order
+            (
+                id        serial primary key,
+                event_schedule_id        int            not null,
+                firstname varchar(255) not null,
+                lastname  varchar(255) not null,
+                email     varchar(255) not null,
+                amount    int          not null
+            );
+        </sql>
+        <addForeignKeyConstraint baseTableName="event_schedule" baseColumnNames="event_id" constraintName="fk_event_id" referencedTableName="event" referencedColumnNames="id" onDelete="CASCADE" onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="ticket_order" baseColumnNames="event_schedule_id" constraintName="fk_event_schedule_id" referencedTableName="event_schedule" referencedColumnNames="id" onDelete="CASCADE" onUpdate="RESTRICT"/>
+    </changeSet>
+</databaseChangeLog>

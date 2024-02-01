@@ -23,17 +23,5 @@
         </createTable>
         <comment>Create `event` table</comment>
 
-        <!-- Also possible SQL definition -->
-
-        <!--<sql>
-            CREATE TABLE event (
-                                   id SERIAL PRIMARY KEY,
-                                   title VARCHAR(255) NOT NULL,
-                                   description TEXT,
-                                   date TIMESTAMP NOT NULL,
-                                   images JSONB not null default '{}'
-            );
-        </sql>-->
-
     </changeSet>
 </databaseChangeLog>
