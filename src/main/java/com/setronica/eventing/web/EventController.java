@@ -1,11 +1,9 @@
 package com.setronica.eventing.web;
 
 import com.setronica.eventing.app.EventService;
+import com.setronica.eventing.dto.EventUpdate;
 import com.setronica.eventing.persistence.Event;
-import com.setronica.eventing.persistence.EventUpdate;
 import jakarta.validation.Valid;
-import org.springframework.dao.DataAccessException;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,21 +19,13 @@ public class EventController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Event>> all() {
-        try {
-            List<Event> allEvents = eventService.getAll();
-            if (allEvents.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.ok(allEvents);
-        } catch (DataAccessException e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    public List<Event> all() {
+        return eventService.getAll();
     }
 
     @GetMapping("{id}")
     public Event show(
-            @PathVariable int id
+            @PathVariable Integer id
     ) {
         return eventService.findById(id);
     }
@@ -46,14 +36,14 @@ public class EventController {
     }
 
     @PutMapping("{id}")
-    public Event update(@PathVariable int id, @RequestBody EventUpdate updatedEvent) {
+    public Event update(@PathVariable Integer id, @RequestBody EventUpdate updatedEvent) {
             Event existingEvent = eventService.findById(id);
             return eventService.update(updatedEvent, existingEvent);
     }
 
     @DeleteMapping("{id}")
-    public void delete(@PathVariable int id) {
+    public void delete(@PathVariable Integer id) {
         Event existingEvent = eventService.findById(id);
-        eventService.delete(id);
+        eventService.delete(existingEvent.getId());
     }
 }

@@ -3,18 +3,16 @@ package com.setronica.eventing.persistence;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Setter
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "\"event\"")
 public class Event {
 
@@ -30,4 +28,7 @@ public class Event {
     @Column
     @NotNull(message = "Date cannot be null")
     private LocalDate date;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "event_id")
+    private List<EventSchedule> eventSchedules = new ArrayList<>();
 }
