@@ -1,0 +1,34 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="20240227-1" author="ben">
+        <sql><![CDATA[
+CREATE OR REPLACE FUNCTION check_ticket_orders()
+            RETURNS TRIGGER AS
+            '
+            DECLARE
+                arow RECORD;
+                total INT := 0;
+            BEGIN
+                -- Calculate the total amount of successful ticket orders
+                FOR arow IN SELECT * FROM ticket_order WHERE event_schedule_id = NEW.event_schedule_id LOOP
+                    IF arow.status != ''FAILED'' THEN
+                        total := total + arow.amount;
+                    END IF;
+                END LOOP;
+
+                IF total > (SELECT available_seats FROM event_schedule WHERE id = NEW.event_schedule_id) THEN
+                    RAISE EXCEPTION ''Not enough available seats'';
+                END IF;
+
+                RETURN NEW;
+            END;
+            '
+            LANGUAGE plpgsql;
+
+        ]]></sql>
+    </changeSet>
+
+</databaseChangeLog>

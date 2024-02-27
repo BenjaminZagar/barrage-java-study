@@ -1,5 +1,5 @@
 package com.setronica.eventing.persistence;
 
 public enum Status {
-    BOOKED, SALE, REFUNDED
+    BOOKED, SALE, REFUNDED, FAILED
 }
