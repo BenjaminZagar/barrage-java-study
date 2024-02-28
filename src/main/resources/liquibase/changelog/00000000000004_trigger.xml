@@ -1,0 +1,14 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+    <changeSet id="20240227-2" author="ben">
+        <sql>
+            CREATE TRIGGER check_ticket_orders_trigger
+            AFTER INSERT OR UPDATE ON ticket_order
+            FOR EACH ROW
+            EXECUTE FUNCTION check_ticket_orders();
+        </sql>
+    </changeSet>
+</databaseChangeLog>

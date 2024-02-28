@@ -3,7 +3,6 @@ package com.setronica.eventing.app;
 import com.setronica.eventing.dto.TicketOrderUpdate;
 import com.setronica.eventing.exceptions.NotEnoughSeats;
 import com.setronica.eventing.exceptions.NotFoundException;
-import com.setronica.eventing.exceptions.OrderAlreadyProcessed;
 import com.setronica.eventing.persistence.EventSchedule;
 import com.setronica.eventing.persistence.Status;
 import com.setronica.eventing.persistence.TicketOrder;
@@ -36,38 +35,27 @@ public class TicketOrderService {
 
     public TicketOrder save(TicketOrder ticketOrder, EventSchedule eventSchedule) {
         log.info("Creating ticket order in database");
-        List<TicketOrder> ticketOrders = eventSchedule.getTicketOrders();
-        int total = 0;
-        for (TicketOrder order : ticketOrders) {
-            total += order.getAmount();
-        }
-        if (total + ticketOrder.getAmount() > eventSchedule.getAvailableSeats()) {
-            throw new NotEnoughSeats("Not enough available seats. Number of available seats:  " + (eventSchedule.getAvailableSeats() - total));
-        }
         ticketOrder.setEventScheduleId(eventSchedule.getId());
         ticketOrder.setPrice(eventSchedule.getPrice());
         ticketOrder.setStatus(Status.BOOKED);
-        return ticketOrderRepository.save(ticketOrder);
+        try {
+            return ticketOrderRepository.save(ticketOrder);
+        } catch (Exception e) {
+                throw new NotEnoughSeats("Not enough seats available");
+        }
     }
 
-    public TicketOrder update(TicketOrder existingTicketOrder, TicketOrderUpdate ticketOrderUpdate, EventSchedule relatedEventSchedule) {
+    public TicketOrder update(TicketOrder existingTicketOrder, TicketOrderUpdate ticketOrderUpdate) {
         log.info("Updating ticket order with id {} in database", existingTicketOrder.getId());
-        if (existingTicketOrder.getStatus() != Status.BOOKED) {
-            throw new OrderAlreadyProcessed("Order already processed");
-        }
-        List<TicketOrder> ticketOrders = relatedEventSchedule.getTicketOrders();
-        int total = 0;
-        for (TicketOrder order : ticketOrders) {
-            total += order.getAmount();
-        }
-        if (total - existingTicketOrder.getAmount() + ticketOrderUpdate.getAmount() > relatedEventSchedule.getAvailableSeats()) {
-            throw new NotEnoughSeats("Not enough available seats. Number of available seats:  " + (relatedEventSchedule.getAvailableSeats() - total + existingTicketOrder.getAmount()));
-        }
         existingTicketOrder.setFirstname(ticketOrderUpdate.getFirstname());
         existingTicketOrder.setLastname(ticketOrderUpdate.getLastname());
         existingTicketOrder.setEmail(ticketOrderUpdate.getEmail());
         existingTicketOrder.setAmount(ticketOrderUpdate.getAmount());
-        return ticketOrderRepository.save(existingTicketOrder);
+        try {
+            return ticketOrderRepository.save(existingTicketOrder);
+        } catch (Exception e) {
+            throw new NotEnoughSeats("Not enough seats available");
+        }
     }
 
     public void delete(Integer id) {

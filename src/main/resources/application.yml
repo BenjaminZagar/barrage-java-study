@@ -9,3 +9,12 @@ spring:
     password: postgres
   jpa:
     show-sql: true
+  rabbitmq:
+    host: 127.0.0.1
+    username: rabbit
+    password: qwesda
+    listener:
+      simple:
+        retry:
+          enabled: true
+          max-attempts: 2

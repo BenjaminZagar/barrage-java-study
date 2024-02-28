@@ -10,7 +10,8 @@
             create table payment_record
             (
             id       int     primary key,
-            total    decimal(10, 2) not null
+            total    decimal(10, 2) not null,
+            status    varchar(255) not null DEFAULT 'PROCESSING'
             );
         </sql>
         <addForeignKeyConstraint baseTableName="payment_record" baseColumnNames="id" constraintName="fk_ticket_order_id" referencedTableName="ticket_order" referencedColumnNames="id" onDelete="CASCADE" onUpdate="RESTRICT"/>

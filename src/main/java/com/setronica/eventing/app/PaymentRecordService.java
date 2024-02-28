@@ -1,8 +1,11 @@
 package com.setronica.eventing.app;
 
+import com.setronica.eventing.configuration.QueueConfiguration;
 import com.setronica.eventing.exceptions.OrderAlreadyProcessed;
 import com.setronica.eventing.persistence.*;
 import org.slf4j.Logger;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -10,30 +13,30 @@ import java.math.BigDecimal;
 @Service
 public class PaymentRecordService {
 
+    @Autowired
+    private RabbitTemplate template;
+
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(PaymentRecordService.class);
 
     private final PaymentRecordRepository paymentRecordRepository;
-    private final TicketOrderRepository ticketOrderRepository;
 
-    public PaymentRecordService(PaymentRecordRepository paymentRecordRepository, TicketOrderRepository ticketOrderRepository) {
+    public PaymentRecordService(PaymentRecordRepository paymentRecordRepository) {
         this.paymentRecordRepository = paymentRecordRepository;
-        this.ticketOrderRepository = ticketOrderRepository;
     }
 
     public void pay(TicketOrder existingTicketOrder) {
         if (existingTicketOrder.getStatus() != Status.BOOKED) {
             throw new OrderAlreadyProcessed("Order already processed");
         }
-        log.info("Sending order details to provider");
-        // simulate payment provider
         PaymentRecord newPaymentRecord = new PaymentRecord();
         newPaymentRecord.setId(existingTicketOrder.getId());
         double total = BigDecimal.valueOf(existingTicketOrder.getAmount()).multiply(existingTicketOrder.getPrice()).doubleValue();
         newPaymentRecord.setTotal(BigDecimal.valueOf(total));
+        newPaymentRecord.setStatus(PaymentStatus.PROCESSING);
         log.info("Saving payment record to DB");
-        paymentRecordRepository.save(newPaymentRecord);
-        log.info("Updating status of existing order to SALE");
-        existingTicketOrder.setStatus(Status.SALE);
-        ticketOrderRepository.save(existingTicketOrder);
+        PaymentRecord savedPaymentRecord = paymentRecordRepository.save(newPaymentRecord);
+        // send message to queue (to payment provider)
+        log.info("Send message to payment provider");
+        template.convertAndSend(QueueConfiguration.topicExchangeName, QueueConfiguration.routingKey, savedPaymentRecord);
     }
 }
